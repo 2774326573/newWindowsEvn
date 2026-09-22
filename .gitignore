@@ -1,0 +1,12 @@
+# Do not publish local installers, plugins, credential material or user backups
+offline/*
+!offline/.gitkeep
+*.bak.*
+*.log
+*.tmp
+.env
+.env.*
+*.pfx
+*.pem
+*.key
+id_*
