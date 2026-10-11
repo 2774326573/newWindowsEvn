@@ -1,46 +1,95 @@
-# newWindowsEvn · Windows developer terminal
+# newWindowsEvn — PowerShell 7 + Neovim Windows development environment
 
-Windows 10/11 x64 + PowerShell 7 + Oh My Posh 10k-style theme + Yazi (git, smart-enter, full-border, diff) + Lazygit + fzf/PSFzf + zoxide + bat + ripgrep + fd.
+A reproducible **keyboard-first Windows 10/11 x64** developer terminal: PowerShell 7 with PSReadLine Vi editing, Neovim, Yazi, Lazygit, fzf/PSFzf, zoxide, Oh My Posh, Git, Xmake and CMake.
 
-**This is a public configuration repository, not an offline binary distribution.** No credentials, fonts, third-party installers or application binaries should be committed.
+**Neovim remains the code editor.** The shell launches workflows, and all shell configuration is split into focused modules. The installer does not change your existing Neovim configuration.
 
-## Deploy on an online Windows PC
+## Quick start (online)
+
+Prerequisites: Windows 10/11 x64, WinGet, PowerShell 7 and Git. Run from a normal PowerShell 7 terminal; use elevation only when a particular publisher installer requires it.
 
 ```powershell
-git clone git@github.com:2774326573/newWindowsEvn.git
+git clone https://github.com/2774326573/newWindowsEvn.git
 cd newWindowsEvn
 pwsh -NoProfile -File .\scripts\Install-Online.ps1
-# Open a new PowerShell 7 window to refresh PATH:
+
+# Restart PowerShell 7 to update PATH, then:
 pwsh -NoProfile -File .\scripts\Install-YaziPlugins.ps1
 pwsh -NoProfile -File .\scripts\Install-Config.ps1
+pwsh -NoProfile -File .\scripts\Test-Syntax.ps1
 pwsh -NoProfile -File .\scripts\Test-Environment.ps1
 ```
 
-If SSH is not configured, use `https://github.com/2774326573/newWindowsEvn.git` instead of the SSH clone URL.
+Open a **new PowerShell 7** window and run `devhelp`. `Install-Config.ps1` keeps differing files; to upgrade an existing deployment after reviewing changes, use `-Force` (which creates timestamped backups).
+
+## Keyboard shortcuts
+
+| Command / shortcut | Purpose |
+| --- | --- |
+| `Esc`, `i`, `h`, `l`, `w`, `b` | PSReadLine Vi editing |
+| `Ctrl+R`, `Ctrl+T` | Fuzzy history / file selection |
+| `v .`, `ff` | Open Neovim / pick a file |
+| `y`, `z keyword` | Yazi (directory sync) / zoxide navigation |
+| `ll`, `catp file` | File icons on demand / bat preview |
+| `gs`, `gd`, `gl`, `lg`, `croot` | Git shortcuts / Lazygit / repository root |
+| `build`, `cmconfig`, `cmtest` | Xmake or CMake build / configure / test |
+
+More examples in [docs/WORKFLOW.md](docs/WORKFLOW.md). Detailed error handling in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+## Layout
+
+```text
+config/
+  packages.txt                  # WinGet IDs shared by online/offline scripts
+  powershell/
+    DevKit.ps1                  # lightweight module loader
+    Modules/
+      10-PSReadLine.ps1
+      20-Search.ps1
+      30-Navigation.ps1
+      40-Git.ps1
+      50-Build.ps1
+      60-Prompt.ps1
+      70-Help.ps1
+  yazi/                         # existing Yazi configuration
+scripts/
+  Install-Online.ps1
+  Install-YaziPlugins.ps1
+  Install-Config.ps1
+  Test-Syntax.ps1
+  Test-Environment.ps1
+  Uninstall-Config.ps1
+  Prepare-Offline.ps1
+  Restore-Offline.ps1
+docs/
+  WORKFLOW.md
+  TROUBLESHOOTING.md
+  SOURCES.md
+offline/                        # ignored local download cache
+themes/                         # repo-owned fallback theme
+```
 
 ## Offline deployment
 
-On an **online** Windows x64 computer with PowerShell 7 + a recent WinGet:
+On a networked Windows x64 machine with PowerShell 7 and WinGet:
 
 ```powershell
 pwsh -NoProfile -File .\scripts\Prepare-Offline.ps1
 ```
 
-Copy the **entire** repository folder with its excluded `offline/` cache to a USB drive. Install the downloaded programs from `offline/installers/` on the offline PC, accounting for installer formats and dependencies. Then run:
+Copy the whole folder, including the Git-ignored `offline/` cache, using removable media. On the target machine, install appropriate verified third-party packages from `offline/installers` and install PowerShell 7 first if needed. Then:
 
 ```powershell
 pwsh -NoProfile -File .\scripts\Restore-Offline.ps1
 pwsh -NoProfile -File .\scripts\Test-Environment.ps1
 ```
 
-The restore script verifies cached file hashes and restores modules, plugins, local theme and configuration; **it does not automatically install every third-party program**. Some WinGet packages may require manual download from the official publisher. Download and install a Nerd Font separately (font files are never distributed from this repository).
+The offline restoration verifies cached SHA-256 files, restores modules and Yazi plugins, and installs configs; it **does not silently install every downloaded program**. Some downloads may require manual acquisition. Hashes from the same cache are an integrity check, not a vendor-signature verification.
 
-## Shortcuts
+## Development scope & safety
 
-`y`: Yazi, with PowerShell directory sync on exit; `lg`: Lazygit; `ll`: file icons loaded on first use; `catp`: bat code preview; `Ctrl+R`: fuzzy history; `Ctrl+T`: fuzzy path; `z keyword`: jump directory.
-
-Yazi: `l` smart-enter, `Ctrl+D` compare selected/hovered files, Git status indicators, rounded borders. For Git status on Windows, Yazi may need Git for Windows' `file.exe`; see `docs/SOURCES.md`.
-
-## Safety / maintenance
-
-Scripts back up differing existing configuration instead of silently overwriting it; review before using `-Force`. The checked-in `themes/10k-local.omp.json` is a **10k-inspired local fallback**, not the upstream Powerlevel10k theme. `Prepare-Offline.ps1` downloads the official `powerlevel10k_rainbow.omp.json`, which is preferred when available. Review `docs/SOURCES.md` for official upstream sources and licensing. Do not commit anything from `offline/` beyond its placeholder files.
+- For DC / NodeFlow C++/Qt, install **MSVC Build Tools**, Windows SDK, Qt, HALCON, camera/PLC SDKs and appropriate licenses separately. Visual Studio IDE is optional; the C++ compiler is not.
+- Windows Terminal needs a separately installed Nerd Font for fancy prompt icons. **No font files** or third-party binaries are committed.
+- No invasive changes to proxies, VPN, Windows security, organization policy, or firewall are performed.
+- Scripts back up changed configs on `-Force`. Roll back the profile integration using `scripts/Uninstall-Config.ps1`.
+- Treat this public repository as configuration/scripts only. Do not publish API keys, machine credentials, vendor SDKs, cached installers or license files.

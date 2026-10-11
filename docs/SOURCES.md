@@ -21,3 +21,11 @@ This repository contains original configuration and deployment scripts. Obtain a
 - WinGet download: https://learn.microsoft.com/en-us/windows/package-manager/winget/download
 
 A locally generated SHA-256 cache manifest detects file changes during copying but does not establish the authenticity or licensing of third-party downloads. Verify publisher signatures or checksums where available.
+
+- Neovim: https://neovim.io/doc/install/
+- Xmake: https://xmake.io/guide/quick-start.html
+- CMake: https://cmake.org/download/
+- PSReadLine Vi mode: https://learn.microsoft.com/powershell/module/psreadline/set-psreadlineoption
+- PSFzf: https://github.com/kelleyma49/PSFzf
+- Yazi package manager: https://yazi-rs.github.io/docs/cli/
+- Visual Studio Build Tools (C++ workload): https://visualstudio.microsoft.com/downloads/

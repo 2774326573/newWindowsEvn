@@ -1,0 +1,15 @@
+# Common WinGet package IDs: online and offline use the same list.
+Microsoft.WindowsTerminal
+Microsoft.PowerShell
+Git.Git
+JanDeDobbeleer.OhMyPosh
+sxyazi.yazi
+JesseDuffield.lazygit
+junegunn.fzf
+ajeetdsouza.zoxide
+sharkdp.bat
+BurntSushi.ripgrep.MSVC
+sharkdp.fd
+Neovim.Neovim
+Xmake-io.Xmake
+Kitware.CMake

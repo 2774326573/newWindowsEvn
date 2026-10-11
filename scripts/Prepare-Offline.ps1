@@ -7,7 +7,9 @@ $off = Join-Path $root 'offline'
 New-Item -ItemType Directory -Force -Path $off | Out-Null
 if (-not $SkipInstallers) {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) { throw 'WinGet required for online installer caching.' }
-    $ids = @('Microsoft.WindowsTerminal','Microsoft.PowerShell','Git.Git','JanDeDobbeleer.OhMyPosh','sxyazi.yazi','JesseDuffield.lazygit','junegunn.fzf','ajeetdsouza.zoxide','sharkdp.bat','BurntSushi.ripgrep.MSVC','sharkdp.fd')
+    $ids = Get-Content -LiteralPath (Join-Path $root 'config\packages.txt') |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and -not $_.StartsWith('#') }
     foreach ($id in $ids) {
         $dest = Join-Path $off "installers\$id"
         New-Item -ItemType Directory -Force -Path $dest | Out-Null
