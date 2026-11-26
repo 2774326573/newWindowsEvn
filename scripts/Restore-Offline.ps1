@@ -1,6 +1,6 @@
 #requires -Version 7.0
 [CmdletBinding()]
-param([switch]$Force)
+param([switch]$Force, [switch]$WithYaziNvim)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $off = Join-Path $root 'offline'
@@ -29,6 +29,8 @@ if (Test-Path -LiteralPath $srcModules) {
 }
 & (Join-Path $PSScriptRoot 'Install-YaziPlugins.ps1') -Offline -Force:$Force
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Install cached Python 3.9+ first.' }
-& python (Join-Path $PSScriptRoot 'install.py') --offline
+$installArgs = @((Join-Path $PSScriptRoot 'install.py'), '--offline')
+if ($WithYaziNvim) { $installArgs += '--with-yazi-nvim' }
+& python @installArgs
 if ($LASTEXITCODE -ne 0) { throw 'Offline configuration deployment incomplete.' }
 Write-Host 'Configuration restored. Install cached third-party programs and Nerd Font separately, then restart pwsh.' -ForegroundColor Green
