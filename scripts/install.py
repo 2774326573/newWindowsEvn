@@ -61,6 +61,35 @@ def config_dir(system=SYSTEM, home=None, environ=None):
     return Path(env.get('XDG_CONFIG_HOME', str(base / '.config'))) / 'yazi'
 
 
+def nvim_config_dir(system=SYSTEM, home=None, environ=None):
+    """Resolve Neovim's config root without assuming a machine-specific path."""
+    env = os.environ if environ is None else environ
+    base = Path.home() if home is None else Path(home)
+    if env.get('NVIM_CONFIG_HOME'):
+        return Path(env['NVIM_CONFIG_HOME']).expanduser()
+    app_name = env.get('NVIM_APPNAME', 'nvim')
+    if not re.fullmatch(r'[A-Za-z0-9._-]+', app_name):
+        raise RuntimeError('NVIM_APPNAME must be a simple directory name.')
+    if system == 'Windows':
+        root = env.get('LOCALAPPDATA')
+        if not root:
+            raise RuntimeError('LOCALAPPDATA is missing; set NVIM_CONFIG_HOME to override.')
+        return Path(root) / app_name
+    return Path(env.get('XDG_CONFIG_HOME', str(base / '.config'))) / app_name
+
+
+def deploy_neovim_yazi():
+    """Opt-in only: add a Lazy.nvim spec; never rewrite init.lua or other plugins."""
+    if SYSTEM == 'Windows' and sys.getwindowsversion().build < 22000:
+        raise RuntimeError('yazi.nvim currently requires Windows 11 or later; existing Yazi CLI support remains available.')
+    source = ROOT / 'config/nvim/lua/plugins/yazi.lua'
+    if not source.is_file():
+        raise RuntimeError('Neovim Yazi plugin template is missing: ' + str(source))
+    target = nvim_config_dir() / 'lua/plugins/yazi.lua'
+    deploy_file(source, target)
+    print('Neovim Yazi plugin spec:', target)
+
+
 def refresh_path():
     paths = []
     if SYSTEM == 'Windows':
@@ -242,7 +271,7 @@ def persist_windows_tool_paths(tools):
             print('Updated user PATH; backup:', backup)
 
 
-def deploy(tools, offline=False):
+def deploy(tools, offline=False, with_yazi_nvim=False):
     cfg = config_dir()
     for name in ('git', 'smart-enter', 'full-border', 'diff'):
         if not (cfg / 'plugins' / (name + '.yazi') / 'main.lua').is_file():
@@ -284,10 +313,12 @@ def deploy(tools, offline=False):
                 link = local_bin / name
                 if not link.exists():
                     link.symlink_to(found)
+    if with_yazi_nvim:
+        deploy_neovim_yazi()
     print('Configuration:', cfg)
 
 
-def verify(tools):
+def verify(tools, with_yazi_nvim=False):
     missing = []
     for tool in tools:
         path = find_tool(tool)
@@ -312,6 +343,10 @@ def verify(tools):
             help_text = str(error)
         if '-jpeg' not in help_text:
             missing.append('Poppler JPEG support')
+    if with_yazi_nvim:
+        plugin_spec = nvim_config_dir() / 'lua/plugins/yazi.lua'
+        if not plugin_spec.is_file():
+            missing.append('Neovim Yazi plugin spec: ' + str(plugin_spec))
     if missing:
         raise RuntimeError('Deployment incomplete: ' + ', '.join(missing))
     print('PASS: common-file tools, plugins and configuration present. Test images in a graphical terminal.')
@@ -323,13 +358,14 @@ def main():
     parser.add_argument('--config-only', action='store_true', help='deploy/back up configs without package installation')
     parser.add_argument('--offline', action='store_true', help='config-only; use cached plugins without network access')
     parser.add_argument('--skip-modules', action='store_true', help='skip optional PowerShell module installation')
+    parser.add_argument('--with-yazi-nvim', action='store_true', help='opt in to deploy a Lazy.nvim Yazi bridge into the existing Neovim config (Windows 11+)')
     args = parser.parse_args()
     if sys.version_info < (3, 9):
         raise RuntimeError('Python 3.9+ required.')
     refresh_path()
     tools = json.loads((ROOT / 'config/file-tools.json').read_text(encoding='utf-8'))['tools']
     if args.check:
-        verify(tools)
+        verify(tools, with_yazi_nvim=args.with_yazi_nvim)
         return
     mgr = None if args.config_only or args.offline else manager()
     if not args.config_only and not args.offline:
@@ -363,9 +399,11 @@ def main():
     if yazi_version() < MIN_YAZI:
         raise RuntimeError('Yazi 26.9.1+ required; configs untouched.')
     persist_windows_tool_paths(tools)
-    deploy(tools, offline=args.offline)
-    verify(tools)
+    deploy(tools, offline=args.offline, with_yazi_nvim=args.with_yazi_nvim)
+    verify(tools, with_yazi_nvim=args.with_yazi_nvim)
     print('Done. Reopen your terminal, run y (or yazi), then hover a file. O opens the default application.')
+    if args.with_yazi_nvim:
+        print('In Neovim run :Lazy sync, then use <leader>fy / <leader>fY.')
 
 
 if __name__ == '__main__':
