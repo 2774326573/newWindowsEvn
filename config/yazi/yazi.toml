@@ -1,3 +1,35 @@
+[preview]
+max_width = 1600
+max_height = 1600
+
+[tasks]
+preload_workers = 1
+
+[opener]
+edit = [
+    { run = 'nvim %s', block = true, for = "unix" },
+    { run = 'nvim %s', block = true, for = "windows" },
+]
+system = [
+    { run = 'start "" %s1', for = "windows", orphan = true, desc = "Default application" },
+    { run = 'open %s', for = "macos", desc = "Default application" },
+    { run = 'xdg-open %s1', for = "linux", desc = "Default application" },
+]
+
+[open]
+prepend_rules = [
+    { url = "*.{pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf,csv,tsv}", use = ["system", "edit", "reveal"] },
+]
+append_rules = [{ url = "*", use = ["system", "reveal"] }]
+
+[[plugin.prepend_previewers]]
+url = "*.{pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf}"
+run = "devkit-office"
+
+[[plugin.prepend_previewers]]
+url = "*.svg"
+run = "magick"
+
 [[plugin.prepend_fetchers]]
 url = "*"
 run = "git"

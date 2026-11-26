@@ -1,5 +1,17 @@
 # Official downloads and licensing
 
+- File preview prerequisites: https://yazi-rs.github.io/docs/installation/
+- Poppler Windows: https://github.com/oschwartz10612/poppler-windows/releases
+- LibreOffice: https://www.libreoffice.org/download/download-libreoffice/
+- LibreOffice PDF export: https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html
+- FFmpeg: https://ffmpeg.org/download.html
+- 7-Zip: https://www.7-zip.org/
+- ImageMagick: https://imagemagick.org/script/download.php
+- jq: https://jqlang.org/download/
+- Python: https://www.python.org/downloads/
+- Homebrew prerequisite: https://brew.sh/
+- Versioned Yazi API: https://github.com/sxyazi/yazi/tree/v26.9.1/yazi-plugin/preset/plugins
+
 This repository contains original configuration and deployment scripts. Obtain application binaries, Yazi extensions and Nerd Font directly from their respective publishers. Do not commit bundled font or third-party installer files to this public repository.
 
 - PowerShell: https://github.com/PowerShell/PowerShell/releases

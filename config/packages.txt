@@ -13,3 +13,10 @@ sharkdp.fd
 Neovim.Neovim
 Xmake-io.Xmake
 Kitware.CMake
+Python.Python.3.13
+oschwartz10612.Poppler
+TheDocumentFoundation.LibreOffice
+7zip.7zip
+Gyan.FFmpeg
+jqlang.jq
+ImageMagick.ImageMagick

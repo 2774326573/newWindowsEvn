@@ -28,5 +28,7 @@ if (Test-Path -LiteralPath $srcModules) {
     }
 }
 & (Join-Path $PSScriptRoot 'Install-YaziPlugins.ps1') -Offline -Force:$Force
-& (Join-Path $PSScriptRoot 'Install-Config.ps1') -Force:$Force
+if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Install cached Python 3.9+ first.' }
+& python (Join-Path $PSScriptRoot 'install.py') --offline
+if ($LASTEXITCODE -ne 0) { throw 'Offline configuration deployment incomplete.' }
 Write-Host 'Configuration restored. Install cached third-party programs and Nerd Font separately, then restart pwsh.' -ForegroundColor Green

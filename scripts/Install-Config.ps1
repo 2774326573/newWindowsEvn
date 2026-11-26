@@ -1,6 +1,6 @@
 #requires -Version 7.0
 [CmdletBinding()]
-param([switch]$Force)
+param([switch]$Force, [switch]$SkipYazi)
 $ErrorActionPreference = 'Stop'
 if (-not $env:APPDATA) { throw 'Windows APPDATA required.' }
 $root = Split-Path -Parent $PSScriptRoot
@@ -39,9 +39,12 @@ else {
 }
 Copy-Safe $themeSource (Join-Path $cfg 'powerlevel10k_rainbow.omp.json')
 
-$ycfg = Join-Path $env:APPDATA 'yazi\config'
-foreach ($name in @('init.lua','yazi.toml','keymap.toml')) {
-    Copy-Safe (Join-Path $root "config\yazi\$name") (Join-Path $ycfg $name)
+if (-not $SkipYazi) {
+    Write-Warning 'For common-file previews, use the repository install.ps1 entry point.'
+    $ycfg = if ($env:YAZI_CONFIG_HOME) { $env:YAZI_CONFIG_HOME } else { Join-Path $env:APPDATA 'yazi\config' }
+    foreach ($name in @('init.lua','yazi.toml','keymap.toml')) {
+        Copy-Safe (Join-Path $root "config\yazi\$name") (Join-Path $ycfg $name)
+    }
 }
 
 $fileExe = 'C:\Program Files\Git\usr\bin\file.exe'

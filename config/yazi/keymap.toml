@@ -7,3 +7,8 @@ desc = "Enter directory or open file"
 on = "<C-d>"
 run = "plugin diff"
 desc = "Compare selected and hovered files"
+
+[[mgr.prepend_keymap]]
+on = "O"
+run = "open --with system"
+desc = "Open with system default application"

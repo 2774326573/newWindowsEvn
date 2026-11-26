@@ -1,0 +1,19 @@
+{
+  "tools": [
+    {"command":"file", "winget":"Git.Git", "brew":"file", "linux":"file"},
+    {"command":"git", "winget":"Git.Git", "brew":"git", "linux":"git"},
+    {"command":"nvim", "winget":"Neovim.Neovim", "brew":"neovim", "linux":"neovim"},
+    {"command":"fzf", "winget":"junegunn.fzf", "brew":"fzf", "linux":"fzf"},
+    {"command":"zoxide", "winget":"ajeetdsouza.zoxide", "brew":"zoxide", "linux":"zoxide"},
+    {"command":"bat", "aliases":["batcat"], "winget":"sharkdp.bat", "brew":"bat", "linux":"bat"},
+    {"command":"rg", "winget":"BurntSushi.ripgrep.MSVC", "brew":"ripgrep", "linux":"ripgrep"},
+    {"command":"fd", "aliases":["fdfind"], "winget":"sharkdp.fd", "brew":"fd", "linux":"fd-find", "pacman":"fd", "zypper":"fd"},
+    {"command":"cmake", "winget":"Kitware.CMake", "brew":"cmake", "linux":"cmake"},
+    {"command":"pdftoppm", "winget":"oschwartz10612.Poppler", "brew":"poppler", "linux":"poppler-utils", "pacman":"poppler", "apk":"poppler-utils", "zypper":"poppler-tools"},
+    {"command":"soffice", "winget":"TheDocumentFoundation.LibreOffice", "brew":"libreoffice", "cask":true, "linux":"libreoffice", "pacman":"libreoffice-fresh"},
+    {"command":"7z", "aliases":["7zz"], "winget":"7zip.7zip", "brew":"sevenzip", "linux":"p7zip-full", "dnf":"7zip", "pacman":"7zip", "zypper":"7zip", "apk":"7zip"},
+    {"command":"ffmpeg", "winget":"Gyan.FFmpeg", "brew":"ffmpeg", "linux":"ffmpeg"},
+    {"command":"jq", "winget":"jqlang.jq", "brew":"jq", "linux":"jq"},
+    {"command":"magick", "aliases":["convert"], "winget":"ImageMagick.ImageMagick", "brew":"imagemagick", "linux":"imagemagick", "dnf":"ImageMagick", "zypper":"ImageMagick"}
+  ]
+}

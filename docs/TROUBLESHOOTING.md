@@ -1,5 +1,21 @@
 # Troubleshooting
 
+## Portable installation / file previews
+
+Use root install.ps1 (Windows) or `sh install.sh` (Unix). Install-Online.ps1 forwards
+to the complete entry; separate config copying does not generate Office runtime
+paths. Run `install.ps1 -Check` or `sh install.sh --check`. Rerun after moving Python
+or LibreOffice. Poppler must be standalone, not a dependency bundled with Codex;
+check JPEG support with `pdftoppm -h`. Microsoft Office alone does not provide the
+LibreOffice conversion command. Encrypted/corrupt documents, conversion timeouts
+and files >200 MiB require `O` to open externally. Configure OS file associations
+first; headless Linux cannot launch a GUI app without a desktop/display session.
+
+Unavailable Linux packages fail explicitly. Install missing tools or enable the
+appropriate official distro repositories and rerun; this installer does not change
+repository sources/proxies/security policies. macOS needs supported Homebrew and
+Python. Fish is not configured; use Bash/Zsh or run `yazi` directly.
+
 ## Shell still uses Windows editing keys
 
 Run `Get-PSReadLineOption | Select-Object EditMode` in a **new** PowerShell 7 window. It should show `Vi`. Check that the relevant `$PROFILE.CurrentUserCurrentHost` sources `~/.config/powershell7-dev-kit/DevKit.ps1`, and that the `Modules` directory exists. PowerShell 5.1 and PowerShell 7 use different profile locations.
