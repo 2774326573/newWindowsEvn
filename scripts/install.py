@@ -210,6 +210,38 @@ def append_block(path, tag, lines):
     deploy_file(path, path, value)
 
 
+def persist_windows_tool_paths(tools):
+    """Persist only required vendor directories absent from machine/user PATH."""
+    if SYSTEM != 'Windows':
+        return
+    import winreg
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment') as key:
+        machine = winreg.QueryValueEx(key, 'Path')[0]
+    with winreg.CreateKey(winreg.HKEY_CURRENT_USER, 'Environment') as key:
+        try:
+            current, kind = winreg.QueryValueEx(key, 'Path')
+        except OSError:
+            current, kind = '', winreg.REG_EXPAND_SZ
+        existing = {os.path.normcase(os.path.expandvars(p).rstrip('\\/')) for p in (machine + ';' + current).split(';')}
+        additions = []
+        for tool in tools:
+            if tool['command'] == 'file':
+                continue  # Git usr/bin would shadow native Windows commands.
+            found = find_tool(tool)
+            if found:
+                folder = str(Path(found).parent)
+                normalized = os.path.normcase(folder.rstrip('\\/'))
+                if normalized not in existing:
+                    additions.append(folder)
+                    existing.add(normalized)
+        if additions:
+            backup = config_dir() / ('user-path.bak.' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f') + '.json')
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            backup.write_text(json.dumps({'Path':current, 'registry_type':kind}, indent=2), encoding='utf-8')
+            winreg.SetValueEx(key, 'Path', 0, kind, current.rstrip(';') + ';' + ';'.join(additions))
+            print('Updated user PATH; backup:', backup)
+
+
 def deploy(tools, offline=False):
     cfg = config_dir()
     for name in ('git', 'smart-enter', 'full-border', 'diff'):
@@ -330,6 +362,7 @@ def main():
         raise RuntimeError('Missing dependencies; configs untouched: ' + ', '.join(absent))
     if yazi_version() < MIN_YAZI:
         raise RuntimeError('Yazi 26.9.1+ required; configs untouched.')
+    persist_windows_tool_paths(tools)
     deploy(tools, offline=args.offline)
     verify(tools)
     print('Done. Reopen your terminal, run y (or yazi), then hover a file. O opens the default application.')
