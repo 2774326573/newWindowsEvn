@@ -78,10 +78,14 @@ def nvim_config_dir(system=SYSTEM, home=None, environ=None):
     return Path(env.get('XDG_CONFIG_HOME', str(base / '.config'))) / app_name
 
 
-def deploy_neovim_yazi():
-    """Opt-in only: add a Lazy.nvim spec; never rewrite init.lua or other plugins."""
+def require_yazi_nvim_platform():
     if SYSTEM == 'Windows' and sys.getwindowsversion().build < 22000:
         raise RuntimeError('yazi.nvim currently requires Windows 11 or later; existing Yazi CLI support remains available.')
+
+
+def deploy_neovim_yazi():
+    """Opt-in only: add a Lazy.nvim spec; never rewrite init.lua or other plugins."""
+    require_yazi_nvim_platform()
     source = ROOT / 'config/nvim/lua/plugins/yazi.lua'
     if not source.is_file():
         raise RuntimeError('Neovim Yazi plugin template is missing: ' + str(source))
@@ -319,6 +323,8 @@ def deploy(tools, offline=False, with_yazi_nvim=False):
 
 
 def verify(tools, with_yazi_nvim=False):
+    if with_yazi_nvim:
+        require_yazi_nvim_platform()
     missing = []
     for tool in tools:
         path = find_tool(tool)
@@ -362,6 +368,8 @@ def main():
     args = parser.parse_args()
     if sys.version_info < (3, 9):
         raise RuntimeError('Python 3.9+ required.')
+    if args.with_yazi_nvim:
+        require_yazi_nvim_platform()
     refresh_path()
     tools = json.loads((ROOT / 'config/file-tools.json').read_text(encoding='utf-8'))['tools']
     if args.check:
