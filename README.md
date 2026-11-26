@@ -10,6 +10,11 @@ Download/clone this repository, open a terminal in its directory, and run:
 
 **Windows 10/11** (Windows PowerShell 5.1 or PowerShell 7):
 
+Double-click **install.bat** after extracting the entire repository. It calls the
+same installer, displays success/failure and keeps the window open for review.
+No administrator launch is required up front; vendor installers may request elevation.
+For terminal use:
+
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
@@ -108,6 +113,7 @@ credentials or licensed SDKs.
 ## Layout and validation
 
 ```text
+install.bat                 Windows double-click entry
 install.ps1 / install.sh     OS bootstrap, one-command entry
 scripts/install.py          shared install/deploy/verify engine
 config/file-tools.json      package IDs and distro aliases
