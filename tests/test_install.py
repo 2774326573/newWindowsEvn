@@ -19,6 +19,62 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual(installer.config_dir('Darwin', '/home/test', {'XDG_CONFIG_HOME':'/custom'}), Path('/custom/yazi'))
         self.assertEqual(installer.config_dir('Windows', '/home/test', {'YAZI_CONFIG_HOME':'/override'}), Path('/override'))
 
+
+    def test_neovim_config_paths_and_overrides(self):
+        self.assertEqual(
+            installer.nvim_config_dir('Windows', '/home/test', {'LOCALAPPDATA':'C:/Users/test/AppData/Local'}),
+            Path('C:/Users/test/AppData/Local/nvim'))
+        self.assertEqual(
+            installer.nvim_config_dir('Linux', '/home/test', {}),
+            Path('/home/test/.config/nvim'))
+        self.assertEqual(
+            installer.nvim_config_dir('Darwin', '/home/test', {'XDG_CONFIG_HOME':'/custom'}),
+            Path('/custom/nvim'))
+        self.assertEqual(
+            installer.nvim_config_dir('Windows', '/home/test', {'NVIM_CONFIG_HOME':'D:/custom/nvim'}),
+            Path('D:/custom/nvim'))
+        self.assertEqual(
+            installer.nvim_config_dir('Linux', '/home/test', {'NVIM_APPNAME':'nvim-dev'}),
+            Path('/home/test/.config/nvim-dev'))
+        with self.assertRaises(RuntimeError):
+            installer.nvim_config_dir('Linux', '/home/test', {'NVIM_APPNAME':'../outside'})
+
+    def test_optional_neovim_yazi_deployment_is_backed_up_and_idempotent(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / 'repo'
+            source = root / 'config/nvim/lua/plugins/yazi.lua'
+            source.parent.mkdir(parents=True)
+            source.write_text('return { plugin = "yazi" }')
+            config = Path(temp) / 'user-nvim'
+            target = config / 'lua/plugins/yazi.lua'
+            target.parent.mkdir(parents=True)
+            target.write_text('return { plugin = "my-custom-plugin" }')
+            with patch.object(installer, 'ROOT', root), \\
+                 patch.object(installer, 'SYSTEM', 'Linux'), \\
+                 patch.object(installer, 'nvim_config_dir', return_value=config):
+                installer.deploy_neovim_yazi()
+                self.assertEqual(target.read_text(), source.read_text())
+                backups = list(target.parent.glob('yazi.lua.bak.*'))
+                self.assertEqual(len(backups), 1)
+                self.assertEqual(backups[0].read_text(), 'return { plugin = "my-custom-plugin" }')
+                installer.deploy_neovim_yazi()
+                self.assertEqual(len(list(target.parent.glob('yazi.lua.bak.*'))), 1)
+
+    def test_yazi_nvim_windows_10_is_rejected(self):
+        from types import SimpleNamespace
+        with patch.object(installer, 'SYSTEM', 'Windows'), \\
+             patch.object(installer.sys, 'getwindowsversion', return_value=SimpleNamespace(build=19045), create=True):
+            with self.assertRaisesRegex(RuntimeError, 'Windows 11'):
+                installer.require_yazi_nvim_platform()
+
+    def test_yazi_nvim_template_is_machine_independent(self):
+        lua = (ROOT / 'config/nvim/lua/plugins/yazi.lua').read_text()
+        self.assertIn('mikavilpas/yazi.nvim', lua)
+        self.assertIn('<leader>fy', lua)
+        self.assertIn('<leader>fY', lua)
+        self.assertIn('open_for_directories = false', lua)
+        self.assertNotIn('C:\\\\Users', lua)
+
     def test_changed_file_backup_and_idempotence(self):
         with tempfile.TemporaryDirectory() as temp:
             source, target = Path(temp) / 'source', Path(temp) / 'target'
