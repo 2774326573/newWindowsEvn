@@ -2,7 +2,7 @@
 
 One installation entry per OS, backed by the same Python standard-library engine.
 Neovim edits code; Yazi browses and previews files; system-associated apps open
-documents for full viewing/editing. Existing Neovim configuration is not changed.
+documents for full viewing/editing. Existing Neovim configuration is untouched by default; an explicit opt-in can add the Yazi bridge.
 
 ## One-command installation
 
