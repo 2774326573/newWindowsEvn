@@ -18,11 +18,18 @@ PSReadLine enables `Set-PSReadLineOption -EditMode Vi`. Press `Esc` for normal m
 
 PSFzf maps **Ctrl+R** to fuzzy history search and **Ctrl+T** to fuzzy path selection. The PSFzf key mappings are separate from Yazi's or Neovim's own bindings.
 
+## File and text search
+
+- `ff` or `vf files`: pick a filename and open it in Neovim.
+- `ftext '关键词'` or `vf grep '关键词'`: search file contents literally with ripgrep, select a result in fzf, and open Neovim at that line. Without a keyword, `ftext` asks for one. ripgrep honors the project's ignore files.
+- Press `Esc`, then `:` on an **empty** command line. It inserts `vf ` and returns to insert mode. Type `files`, `grep '关键词'`, or `help`, then Enter. This is a Vim-style entry to the supported shortcuts, not a Vim Ex interpreter. It never replaces an in-progress command.
+- In fzf, use Ctrl+N / Ctrl+P to navigate and Enter to select. Tab completion and Ctrl+R history bindings are unchanged.
+
 ## Configuration ownership
 
 `config/powershell/DevKit.ps1` loads sorted scripts from `config/powershell/Modules`:
 - `10-PSReadLine.ps1`: Vi mode and history
-- `20-Search.ps1`: fzf + PSFzf bindings + `ff`
+- `20-Search.ps1`: fzf + PSFzf bindings + `ff`, `ftext`, `vf`
 - `30-Navigation.ps1`: `v`, `ll`, `catp`, `y`, zoxide
 - `40-Git.ps1`: read-only Git shortcuts + Lazygit
 - `50-Build.ps1`: Xmake/CMake routing
