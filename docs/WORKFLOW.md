@@ -12,6 +12,18 @@ The terminal is the command launcher; Neovim remains the editor. This setup does
 6. `cmconfig` creates a CMake build directory; `cmtest` runs CTest there. Use project-specific build instructions where required.
 7. `devhelp` prints the shortcut reference.
 
+## Optional Neovim Yazi bridge
+
+The normal environment install leaves your Neovim configuration untouched. If you want Yazi inside Neovim as a floating file manager, opt in on Windows 11+:
+
+```powershell
+.\install.ps1 -WithYaziNvim
+# Existing installation:
+.\install.ps1 -ConfigOnly -WithYaziNvim
+```
+
+This adds a backed-up Lazy.nvim spec only; it does not replace Neo-tree or the existing PowerShell `y` command. Run `:Lazy sync` once, then use `<leader>fy` for the current file or `<leader>fY` for the working directory. See [Neovim + Yazi](NEOVIM-YAZI.md). Windows 10 keeps the terminal Yazi workflow and skips this bridge.
+
 ## Command-line Vi mode
 
 PSReadLine enables `Set-PSReadLineOption -EditMode Vi`. Press `Esc` for normal mode and `i` for insert mode. The cursor indicator requires terminal support. These are **command-line** keys, not a full Vim instance.
