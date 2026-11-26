@@ -73,7 +73,7 @@ class InstallerTests(unittest.TestCase):
         self.assertIn('<leader>fy', lua)
         self.assertIn('<leader>fY', lua)
         self.assertIn('open_for_directories = false', lua)
-        self.assertNotIn('C:\\\\Users', lua)
+        self.assertNotIn(r'C:\Users', lua)
 
     def test_changed_file_backup_and_idempotence(self):
         with tempfile.TemporaryDirectory() as temp:
