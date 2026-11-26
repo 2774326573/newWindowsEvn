@@ -5,7 +5,13 @@ cd "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 if ! command -v python3 >/dev/null 2>&1; then
     case "${1:-}" in --check|--config-only|--offline) echo 'Python 3.9+ required; no changes made.'; exit 1 ;; esac
     case "$(uname -s)" in
-        Darwin) echo 'Python 3.9+ required: install Homebrew, then brew install python'; exit 1 ;;
+        Darwin)
+            if ! command -v brew >/dev/null 2>&1; then
+                if [ -x /opt/homebrew/bin/brew ]; then PATH="/opt/homebrew/bin:$PATH"; export PATH
+                elif [ -x /usr/local/bin/brew ]; then PATH="/usr/local/bin:$PATH"; export PATH
+                else echo 'Homebrew required: install from https://brew.sh and rerun.'; exit 1; fi
+            fi
+            brew install python ;;
         Linux)
             if [ "$(id -u)" = 0 ]; then SUDO=''; else SUDO='sudo'; fi
             if command -v apt-get >/dev/null 2>&1; then $SUDO apt-get update; $SUDO apt-get install -y python3

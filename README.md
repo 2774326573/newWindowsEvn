@@ -22,7 +22,7 @@ sh install.sh
 
 Windows requires WinGet (Microsoft App Installer); Python 3.13 is installed if no
 working Python 3.9+ exists. Linux bootstraps Python via the detected package manager
-and may request sudo. macOS requires Homebrew and Python 3.9+ (`brew install python`).
+and may request sudo. macOS requires Homebrew; missing Python is installed via brew.
 Internet access and permission to install packages are required. Machine execution
 policies, proxies, security settings and the default login shell are not changed.
 
