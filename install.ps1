@@ -1,6 +1,6 @@
 # Windows 10/11 bootstrap; also works from Windows PowerShell 5.1.
 [CmdletBinding()]
-param([switch]$Check, [switch]$ConfigOnly, [switch]$SkipModules)
+param([switch]$Check, [switch]$ConfigOnly, [switch]$SkipModules, [switch]$WithYaziNvim)
 $ErrorActionPreference = 'Stop'
 $python = $null
 foreach ($name in @('python', 'python3')) {
@@ -23,5 +23,6 @@ $installArgs = @((Join-Path $PSScriptRoot 'scripts\install.py'))
 if ($Check) { $installArgs += '--check' }
 if ($ConfigOnly) { $installArgs += '--config-only' }
 if ($SkipModules) { $installArgs += '--skip-modules' }
+if ($WithYaziNvim) { $installArgs += '--with-yazi-nvim' }
 & $python @installArgs
 exit $LASTEXITCODE
