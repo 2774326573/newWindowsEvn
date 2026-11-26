@@ -27,3 +27,8 @@ Tests cover config paths, package mappings, backups/idempotence, profile content
 unsupported inputs, process timeout and generated DOCX/XLSX/PPTX/PDF conversion.
 CI unit tests run on Windows/Linux/macOS, conversion on Linux. Terminal image
 rendering and application associations need interactive local validation.
+
+
+## Optional Neovim bridge
+
+Keep the terminal/Yazi workflow as the default and leave existing Neovim configuration untouched. An explicit `--with-yazi-nvim` option deploys one Lazy.nvim spec into the active Neovim config, with timestamped backup and idempotent replacement. Do not bundle or install a second Yazi executable; the bridge reuses the repository-managed Yazi command. Windows 10 remains supported for the CLI workflow but is excluded from the yazi.nvim opt-in, which requires Windows 11+. Plugin installation is delegated to the user's existing Lazy.nvim setup.
