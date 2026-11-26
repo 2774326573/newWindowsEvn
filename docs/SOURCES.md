@@ -35,6 +35,7 @@ This repository contains original configuration and deployment scripts. Obtain a
 A locally generated SHA-256 cache manifest detects file changes during copying but does not establish the authenticity or licensing of third-party downloads. Verify publisher signatures or checksums where available.
 
 - Neovim: https://neovim.io/doc/install/
+- Neovim Yazi bridge: https://github.com/mikavilpas/yazi.nvim
 - Xmake: https://xmake.io/guide/quick-start.html
 - CMake: https://cmake.org/download/
 - PSReadLine Vi mode: https://learn.microsoft.com/powershell/module/psreadline/set-psreadlineoption
