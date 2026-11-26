@@ -35,3 +35,7 @@ jobs:
       - run: python -m unittest discover -s tests -v
         env:
           DEVKIT_INTEGRATION: '1'
+      - name: Install from the public entry point
+        run: sh install.sh
+      - name: Check deployed configuration
+        run: sh install.sh --check
