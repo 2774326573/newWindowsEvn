@@ -43,6 +43,10 @@ Hover to preview, `J/K` to scroll preview pages, `O` for the default application
 with Yazi image support for PDF/Office/image previews. Font rendering and GUI
 application associations still require an interactive check.
 
+## Optional Neovim + Yazi bridge
+
+The default installer keeps your existing Neovim configuration untouched. On Windows 11+, opt in with `install.ps1 -WithYaziNvim`; on an existing installation use `install.ps1 -ConfigOnly -WithYaziNvim`. Linux/macOS can use `python3 scripts/install.py --config-only --with-yazi-nvim`. This deploys a Lazy.nvim spec with backup protection; it does not install another Yazi executable. Then run `:Lazy sync` in Neovim. Shortcuts: `<leader>fy` (current file) and `<leader>fY` (working directory). Windows 10 keeps the existing Yazi CLI workflow but does not enable yazi.nvim. See [Neovim + Yazi guide](docs/NEOVIM-YAZI.md).
+
 ## File coverage
 
 | Files | Preview | Open/edit |
@@ -118,11 +122,12 @@ install.ps1 / install.sh     OS bootstrap, one-command entry
 scripts/install.py          shared install/deploy/verify engine
 config/file-tools.json      package IDs and distro aliases
 config/yazi/                Yazi rules and owned Office previewer
+config/nvim/lua/plugins/    Optional Lazy.nvim Yazi bridge
 config/powershell/          existing Windows shell modules
 config/shell/devkit.sh      Bash/Zsh helpers
 scripts/                    Windows compatibility/offline/check scripts
 tests/                      backup, path, package and conversion tests
-docs/                       workflows, troubleshooting and sources
+docs/                       workflows, troubleshooting, sources and Neovim bridge guide
 ```
 
 ```sh
