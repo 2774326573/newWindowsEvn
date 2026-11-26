@@ -5,6 +5,8 @@ function devhelp {
         '  Ctrl+R / Ctrl+T     Search history / select a path (PSFzf)'
         '  v [file]            Open Neovim'
         '  ff                  Pick a file with fzf and edit in Neovim'
+        '  ftext [text]        Search file contents and jump to the matching line'
+        '  Esc :               On an empty line, insert vf for files / grep / help'
         '  y                   Yazi with directory sync on exit'
         '  z <keyword>         Jump to a previously visited directory'
         '  ll / catp           Directory list / syntax-highlighted preview'
