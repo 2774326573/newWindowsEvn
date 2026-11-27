@@ -43,11 +43,13 @@ if (Test-Path -LiteralPath $vswhere) {
     $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
 }
 if ($vs) {
+    $vsVersion = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion 2>$null
     $cl = Get-ChildItem -LiteralPath (Join-Path $vs 'VC\Tools\MSVC') -Directory -ErrorAction SilentlyContinue |
         Sort-Object Name -Descending | Select-Object -First 1
-    Add-Result 'msvc' 'Visual Studio C++ Build Tools' $true $(if ($cl) { $cl.Name } else { '' }) $vs 'VC x86/x64 component detected; cl.exe requires a Developer environment.'
+    $isVs2022 = [string]$vsVersion -like '17.*'
+    Add-Result 'msvc' 'Visual Studio 2022 C++ Build Tools' $isVs2022 ([string]$vsVersion + '; toolset ' + $(if ($cl) { $cl.Name } else { 'not found' })) $vs $(if ($isVs2022) { 'VC x86/x64 component detected; cl.exe requires a Developer environment.' } else { 'Detected Visual Studio is not 2022 (17.x).' })
 } else {
-    Add-Result 'msvc' 'Visual Studio C++ Build Tools' $false '' '' 'Install VS 2022 C++ workload or Build Tools.'
+    Add-Result 'msvc' 'Visual Studio 2022 C++ Build Tools' $false '' '' 'Install VS 2022 C++ workload or Build Tools.'
 }
 
 # Windows SDK versions are installed side-by-side.
@@ -118,6 +120,13 @@ if ($opencvCandidates.Count) {
 $selected = if ($Profile -eq 'All') { @('msvc','windows-sdk','qt5','mingw','cmake','xmake','opencv') } else {
     ($policy.profiles | Where-Object Id -eq $Profile | Select-Object -ExpandProperty required)
 }
+$compatibilityWarnings = @()
+if ($Profile -eq 'qt5-msvc' -and -not (@($qtRows | Where-Object { $_.Spec -match 'msvc' }).Count)) {
+    $compatibilityWarnings += 'No Qt kit with an MSVC QMAKE_XSPEC was detected; do not mix a MinGW Qt kit with MSVC.'
+}
+if ($Profile -eq 'qt5-mingw' -and -not (@($qtRows | Where-Object { $_.Spec -match 'g\+\+|mingw' }).Count)) {
+    $compatibilityWarnings += 'No Qt kit with a MinGW/G++ QMAKE_XSPEC was detected; do not mix an MSVC Qt kit with MinGW.'
+}
 $report = [pscustomobject]@{
     SchemaVersion = 1
     GeneratedAt = (Get-Date).ToString('o')
@@ -129,6 +138,7 @@ $report = [pscustomobject]@{
     Results = @($items)
     RequiredForProfile = @($selected)
     MissingForProfile = @($items | Where-Object { $_.Id -in $selected -and -not $_.Found } | Select-Object -ExpandProperty Id -Unique)
+    CompatibilityWarnings = $compatibilityWarnings
     Notes = @('Read-only inventory; no software is installed, removed or switched.',
               'MSVC detection uses vswhere; a Developer PowerShell is still needed to expose cl.exe.',
               'Qt kit/compiler ABI compatibility is not inferred from qmake alone.',
@@ -147,7 +157,9 @@ else {
     $items | Format-Table Id, Name, Found, Version, Path -AutoSize
     if ($report.MissingForProfile.Count) {
         Write-Warning ("Missing for profile {0}: {1}" -f $Profile, ($report.MissingForProfile -join ', '))
-    } else {
+    }
+    foreach ($warning in $report.CompatibilityWarnings) { Write-Warning $warning }
+    if (-not $report.MissingForProfile.Count -and -not $report.CompatibilityWarnings.Count) {
         Write-Host "PASS: detected required components for $Profile." -ForegroundColor Green
     }
 }
