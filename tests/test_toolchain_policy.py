@@ -19,6 +19,22 @@ class ToolchainPolicyTests(unittest.TestCase):
         self.assertIn('cmake', profiles['qt5-mingw']['required'])
         self.assertIn('xmake', profiles['qt5-msvc']['required'])
 
+    def test_inventory_script_is_read_only_and_has_both_profiles(self):
+        script = (ROOT / 'scripts/Manage-Toolchain.ps1').read_text(encoding='utf-8')
+        self.assertIn("[ValidateSet('Check','Export')]", script)
+        self.assertIn("vswhere.exe", script)
+        self.assertIn("qmake", script)
+        self.assertIn("OpenCVConfig.cmake", script)
+        self.assertIn("if (-not $IsWindows)", script)
+        self.assertNotIn("winget install", script.lower())
+        self.assertNotIn("Remove-Item", script)
+
+    def test_offline_preparation_exports_inventory_before_checksum_manifest(self):
+        script = (ROOT / 'scripts/Prepare-Offline.ps1').read_text(encoding='utf-8')
+        self.assertIn("Manage-Toolchain.ps1", script)
+        self.assertIn("toolchain-inventory.json", script)
+        self.assertLess(script.index("toolchain-inventory.json"), script.index("SHA256SUMS.csv"))
+
     def test_proprietary_sdks_are_not_managed_or_copied(self):
         policy = json.loads((ROOT / 'config/toolchains.json').read_text(encoding='utf-8'))
         excluded = ' '.join(policy['not_managed']).lower()
