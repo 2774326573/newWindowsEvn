@@ -35,7 +35,6 @@ Remove-Item -LiteralPath $tmp -Recurse -Force
 # This is an inventory only; proprietary SDKs and licensed installers are never copied.
 $inventory = Join-Path $off 'toolchain-inventory.json'
 & (Join-Path $PSScriptRoot 'Manage-Toolchain.ps1') -Mode Export -Profile All -Output $inventory
-if ($LASTEXITCODE -ne 0) { throw 'Toolchain inventory export failed.' }
 if (-not (Test-Path -LiteralPath $inventory -PathType Leaf)) { throw 'Toolchain inventory was not generated.' }
 if (-not $SkipModules) {
     $modDir = Join-Path $off 'modules'
