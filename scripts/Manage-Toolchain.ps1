@@ -40,10 +40,10 @@ function Get-Version {
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
 $vs = $null
 if (Test-Path -LiteralPath $vswhere) {
-    $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
+    $vs = & $vswhere -version '[17.0,18.0)' -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
 }
 if ($vs) {
-    $vsVersion = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion 2>$null
+    $vsVersion = & $vswhere -version '[17.0,18.0)' -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion 2>$null
     $cl = Get-ChildItem -LiteralPath (Join-Path $vs 'VC\Tools\MSVC') -Directory -ErrorAction SilentlyContinue |
         Sort-Object Name -Descending | Select-Object -First 1
     $isVs2022 = [string]$vsVersion -like '17.*'
@@ -158,7 +158,7 @@ $report = [pscustomobject]@{
               'Qt kit/compiler ABI compatibility is not inferred from qmake alone.',
               'HALCON and vendor SDKs/licenses are intentionally not inspected or copied.')
 }
-$report | ConvertTo-Json -Depth 8 | ForEach-Object { $json = $_ }
+$json = ConvertTo-Json -InputObject $report -Depth 8
 if ($Output) {
     $destination = [IO.Path]::GetFullPath($Output)
     $parent = Split-Path -Parent $destination
