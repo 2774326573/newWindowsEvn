@@ -50,6 +50,23 @@ PSFzf maps **Ctrl+R** to fuzzy history search and **Ctrl+T** to fuzzy path selec
 
 To customize, edit the **repository copies**, then run `scripts/Install-Config.ps1 -Force` to back up deployed copies and deploy changes. Alternatively edit the deployed copies locally without overwriting them.
 
+## Toolchain inventory
+
+Use the read-only inventory before building or migrating a C++/Qt workstation:
+
+```powershell
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Profile qt5-msvc
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Profile qt5-mingw
+```
+
+Export detected versions and paths for migration planning:
+
+```powershell
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Mode Export -Output .\offline\toolchain-inventory.json
+```
+
+This does not install or switch compilers. Qt must match the compiler ABI. See [toolchain policy](TOOLCHAIN.md).
+
 ## Windows C++ / Qt / HALCON development
 
 - A command-line editor does **not** provide a compiler. Build DC/NodeFlow with their required **MSVC toolchain**, Windows SDK, Qt, HALCON and vendor SDKs installed separately.
