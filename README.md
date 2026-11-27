@@ -103,6 +103,18 @@ Respects `YAZI_CONFIG_HOME` and Unix `XDG_CONFIG_HOME`. Python/helper paths are
 generated locally, never committed or copied from another machine. Rerun after
 moving Python, LibreOffice or other dependency executables.
 
+## C++ / Qt toolchain inventory
+
+A read-only toolchain manager detects Visual Studio 2022 C++ tools, Windows SDK, Qt 5 kits, MinGW GCC, CMake, Xmake and OpenCV. It records two profiles: `qt5-msvc` and `qt5-mingw`, with C++20 and Qt 5 preferred (reference Qt 5.12.12). Qt 6 is not auto-installed. HALCON and vendor SDKs/licenses remain separately managed.
+
+```powershell
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Profile qt5-msvc
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Profile qt5-mingw
+pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Mode Export -Output .\offline\toolchain-inventory.json
+```
+
+The manager reports installed components; it does not yet switch compilers or install licensed SDKs. See [C++ / Qt toolchain guide](docs/TOOLCHAIN.md).
+
 ## Offline Windows deployment
 
 Run `pwsh -NoProfile -File .\scripts\Prepare-Offline.ps1` online, then copy the
@@ -121,13 +133,14 @@ install.bat                 Windows double-click entry
 install.ps1 / install.sh     OS bootstrap, one-command entry
 scripts/install.py          shared install/deploy/verify engine
 config/file-tools.json      package IDs and distro aliases
+config/toolchains.json      C++20 / Qt5 MSVC and MinGW profile policy
 config/yazi/                Yazi rules and owned Office previewer
 config/nvim/lua/plugins/    Optional Lazy.nvim Yazi bridge
 config/powershell/          existing Windows shell modules
 config/shell/devkit.sh      Bash/Zsh helpers
-scripts/                    Windows compatibility/offline/check scripts
+scripts/                    Windows compatibility/offline/check scripts, toolchain inventory
 tests/                      backup, path, package and conversion tests
-docs/                       workflows, troubleshooting, sources and Neovim bridge guide
+docs/                       workflows, troubleshooting, sources, toolchain and Neovim guides
 ```
 
 ```sh
