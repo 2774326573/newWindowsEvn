@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "name": "Windows C++ / Qt developer workstation",
+  "platform": "Windows 10 19041+ / Windows 11",
+  "policy": {
+    "cpp_standard": "C++20",
+    "qt_preferred_major": 5,
+    "qt_preferred_version": "5.12.12",
+    "qt6_auto_install": false,
+    "msvc_preferred": "Visual Studio 2022",
+    "mingw_min_gcc_major": 10,
+    "windows_sdk_min_build": 19041
+  },
+  "managed_tools": [
+    {
+      "id": "msvc",
+      "name": "Microsoft C++ Build Tools",
+      "required_for_profiles": ["qt5-msvc"],
+      "detection": "vswhere",
+      "install_policy": "manual_or_visual_studio_installer",
+      "notes": "Detect Visual Studio 2022 with the VC x86/x64 tools component. Do not install silently or modify workloads."
+    },
+    {
+      "id": "windows-sdk",
+      "name": "Windows 10/11 SDK",
+      "required_for_profiles": ["qt5-msvc"],
+      "detection": "windows_kits_registry",
+      "install_policy": "visual_studio_installer_or_windows_sdk_installer"
+    },
+    {
+      "id": "qt5",
+      "name": "Qt 5",
+      "preferred_version": "5.12.12",
+      "required_for_profiles": ["qt5-msvc", "qt5-mingw"],
+      "detection": "qmake",
+      "install_policy": "manual_or_qt_maintenance_tool",
+      "notes": "Do not automatically download Qt 6. Keep compiler ABI matched to the Qt kit."
+    },
+    {
+      "id": "mingw",
+      "name": "MinGW-w64 GCC",
+      "minimum_gcc_major": 10,
+      "required_for_profiles": ["qt5-mingw"],
+      "detection": "g++",
+      "install_policy": "manual_or_distribution_package"
+    },
+    {
+      "id": "cmake",
+      "name": "CMake",
+      "minimum_version": "3.20",
+      "required_for_profiles": ["qt5-msvc", "qt5-mingw"],
+      "detection": "cmake",
+      "install_policy": "winget_or_official_installer"
+    },
+    {
+      "id": "xmake",
+      "name": "Xmake",
+      "required_for_profiles": ["qt5-msvc", "qt5-mingw"],
+      "detection": "xmake",
+      "install_policy": "winget_or_official_installer"
+    },
+    {
+      "id": "opencv",
+      "name": "OpenCV",
+      "required_for_profiles": [],
+      "detection": "opencv_config",
+      "install_policy": "manual_or_project_package",
+      "notes": "Detect OpenCV_DIR and common CMake package locations; project-specific ABI/build options still require validation."
+    }
+  ],
+  "profiles": [
+    {
+      "id": "qt5-msvc",
+      "name": "Qt 5 + MSVC 2022",
+      "compiler": "MSVC",
+      "qt_major": 5,
+      "required": ["msvc", "windows-sdk", "qt5", "cmake", "xmake"]
+    },
+    {
+      "id": "qt5-mingw",
+      "name": "Qt 5 + MinGW-w64",
+      "compiler": "MinGW",
+      "qt_major": 5,
+      "required": ["mingw", "qt5", "cmake", "xmake"]
+    }
+  ],
+  "not_managed": [
+    "HALCON licenses and SDK",
+    "camera / PLC / motion-control vendor SDKs",
+    "proprietary DLLs and runtime redistributables",
+    "private credentials and license files"
+  ]
+}
