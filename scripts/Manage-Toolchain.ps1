@@ -8,6 +8,7 @@ param(
     [string]$Output
 )
 $ErrorActionPreference = 'Stop'
+if (-not $IsWindows) { throw 'Manage-Toolchain.ps1 currently supports Windows only.' }
 $root = Split-Path -Parent $PSScriptRoot
 $policyPath = Join-Path $root 'config\toolchains.json'
 $policy = Get-Content -LiteralPath $policyPath -Raw -Encoding UTF8 | ConvertFrom-Json
