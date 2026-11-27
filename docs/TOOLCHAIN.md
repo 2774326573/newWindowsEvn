@@ -41,10 +41,12 @@ A found Qt kit does not prove compiler ABI compatibility. Match Qt's compiler ki
 pwsh -NoProfile -File .\scripts\Manage-Toolchain.ps1 -Mode Export -Output .\offline\toolchain-inventory.json
 ```
 
-The JSON report records OS/architecture, detected tool versions and paths, and profile gaps. Review it before migrating to another machine. It is an inventory, not a machine restore script; paths and installed components differ between computers.
+The JSON report records OS/architecture, detected tool versions and paths, and profile gaps. It can contain the computer name and local installation paths; review or redact it before sharing publicly. Review it before migrating to another machine. It is an inventory, not a machine restore script; paths and installed components differ between computers.
 
 Running `scripts/Prepare-Offline.ps1` also saves a toolchain inventory into the offline cache before generating its SHA-256 manifest.
 
 ## Next stage
 
 This phase establishes detection and a portable policy. Automated side-by-side compiler switching, project-specific Qt kit resolution, package acquisition and full machine restore are deliberately separate follow-up work. Vendor installers, Qt offline repositories, HALCON and camera/PLC SDK packages must be acquired from authorized sources and handled according to their licenses.
+
+Architecture decision: [C++ / Qt toolchain and offline migration policy](decisions/cpp-toolchain.md).
