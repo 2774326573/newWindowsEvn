@@ -121,7 +121,7 @@ Run `pwsh -NoProfile -File .\scripts\Prepare-Offline.ps1` online, then copy the
 complete directory including ignored `offline/`. Install cached vendor programs
 (including Python, PowerShell 7, Poppler and LibreOffice) first, then run
 `scripts/Restore-Offline.ps1`. It checks SHA-256, restores modules/cached plugins,
-and calls the same config generator without downloads. Offline caching remains
+and calls the same config generator without downloads. It also includes `toolchain-inventory.json` for comparing the source and target C++/Qt environments; this report does not install licensed SDKs. Offline caching remains
 Windows-specific; Unix installation currently needs online repositories. Cache
 hashes verify copying integrity, not vendor authenticity. Do not commit installers,
 credentials or licensed SDKs.
@@ -160,4 +160,4 @@ backups as needed. On Unix remove the marked profile blocks and restore backups.
 Uninstall third-party packages separately with the native package manager.
 
 See [workflow](docs/WORKFLOW.md), [troubleshooting](docs/TROUBLESHOOTING.md),
-[sources](docs/SOURCES.md), [design decision](docs/decisions/portable-files.md).
+[sources](docs/SOURCES.md), [design decision](docs/decisions/portable-files.md), [C++/Qt toolchain decision](docs/decisions/cpp-toolchain.md).
