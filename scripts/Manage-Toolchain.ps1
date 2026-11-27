@@ -59,7 +59,8 @@ if (Test-Path -LiteralPath (Join-Path $sdkRoot 'Include')) {
     $sdkVersions = @(Get-ChildItem -LiteralPath (Join-Path $sdkRoot 'Include') -Directory -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -match '^10\.\d+\.\d+\.\d+$' } | Select-Object -ExpandProperty Name | Sort-Object -Descending)
 }
-Add-Result 'windows-sdk' 'Windows SDK' ($sdkVersions.Count -gt 0) ($sdkVersions -join ', ') $sdkRoot
+$supportedSdkVersions = @($sdkVersions | Where-Object { try { [version]$_ -ge [version]'10.0.19041.0' } catch { $false } })
+Add-Result 'windows-sdk' 'Windows SDK (19041+)' ($supportedSdkVersions.Count -gt 0) ($sdkVersions -join ', ') $sdkRoot $(if ($supportedSdkVersions.Count) { 'Supported SDK detected.' } else { 'Windows SDK 10.0.19041.0 or newer is required for this baseline.' })
 
 # Qt: discover qmake on PATH and from common Qt installations.
 $qmakeCandidates = [System.Collections.Generic.List[string]]::new()
@@ -83,13 +84,18 @@ $qtRows = foreach ($candidate in ($qmakeCandidates | Select-Object -Unique)) {
 }
 $qtRows = @($qtRows | Sort-Object Version -Descending -Unique)
 if ($qtRows.Count) {
-    foreach ($qt in $qtRows) { Add-Result 'qt5' 'Qt SDK' ($qt.Version -like '5.*') $qt.Version $qt.Path ("Kit: " + $qt.Spec) }
+    foreach ($qt in $qtRows) { Add-Result 'qt5' 'Qt 5 SDK' ($qt.Version -like '5.*') $qt.Version $qt.Path ("Kit: " + $qt.Spec) }
 } else {
     Add-Result 'qt5' 'Qt SDK' $false '' '' 'qmake.exe not found. Add the intended Qt kit to PATH or QT_DIR.'
 }
 
 $gxx = Get-CommandInfo 'g++' @('--version')
-if ($gxx) { Add-Result 'mingw' 'MinGW-w64 GCC' $true (Get-Version $gxx.Output) $gxx.Path $gxx.Output.Split("`n")[0] }
+if ($gxx) {
+    $gccVersion = Get-Version $gxx.Output
+    $gccSupported = $false
+    try { $gccSupported = [version]$gccVersion -ge [version]'10.0' } catch { }
+    Add-Result 'mingw' 'MinGW-w64 GCC 10+' $gccSupported $gccVersion $gxx.Path $gxx.Output.Split("`n")[0]
+}
 else { Add-Result 'mingw' 'MinGW-w64 GCC' $false '' '' 'g++ not found on PATH.' }
 
 foreach ($tool in @(
@@ -97,7 +103,14 @@ foreach ($tool in @(
     @{ Id='xmake'; Name='Xmake'; Command='xmake'; Args=@('--version') }
 )) {
     $info = Get-CommandInfo $tool.Command $tool.Args
-    if ($info) { Add-Result $tool.Id $tool.Name $true (Get-Version $info.Output) $info.Path $info.Output.Split("`n")[0] }
+    if ($info) {
+        $version = Get-Version $info.Output
+        $supported = $true
+        if ($tool.Id -eq 'cmake') {
+            try { $supported = [version]$version -ge [version]'3.20' } catch { $supported = $false }
+        }
+        Add-Result $tool.Id $tool.Name $supported $version $info.Path $info.Output.Split("`n")[0]
+    }
     else { Add-Result $tool.Id $tool.Name $false '' '' ($tool.Command + ' not found on PATH.') }
 }
 
@@ -117,14 +130,15 @@ if ($opencvCandidates.Count) {
     Add-Result 'opencv' 'OpenCV' $false '' '' 'OpenCV_DIR / OpenCVConfig.cmake not found.'
 }
 
-$selected = if ($Profile -eq 'All') { @('msvc','windows-sdk','qt5','mingw','cmake','xmake','opencv') } else {
+$selected = if ($Profile -eq 'All') { @() } else {
     ($policy.profiles | Where-Object Id -eq $Profile | Select-Object -ExpandProperty required)
 }
+$missingForProfile = @($selected | Where-Object { $id = $_; -not (@($items | Where-Object { $_.Id -eq $id -and $_.Found }).Count) })
 $compatibilityWarnings = @()
-if ($Profile -eq 'qt5-msvc' -and -not (@($qtRows | Where-Object { $_.Spec -match 'msvc' }).Count)) {
+if ($Profile -eq 'qt5-msvc' -and -not (@($qtRows | Where-Object { $_.Version -like '5.*' -and $_.Spec -match 'msvc' }).Count)) {
     $compatibilityWarnings += 'No Qt kit with an MSVC QMAKE_XSPEC was detected; do not mix a MinGW Qt kit with MSVC.'
 }
-if ($Profile -eq 'qt5-mingw' -and -not (@($qtRows | Where-Object { $_.Spec -match 'g\+\+|mingw' }).Count)) {
+if ($Profile -eq 'qt5-mingw' -and -not (@($qtRows | Where-Object { $_.Version -like '5.*' -and $_.Spec -match 'g\+\+|mingw' }).Count)) {
     $compatibilityWarnings += 'No Qt kit with a MinGW/G++ QMAKE_XSPEC was detected; do not mix an MSVC Qt kit with MinGW.'
 }
 $report = [pscustomobject]@{
@@ -137,7 +151,7 @@ $report = [pscustomobject]@{
     Policy = $policy.policy
     Results = @($items)
     RequiredForProfile = @($selected)
-    MissingForProfile = @($items | Where-Object { $_.Id -in $selected -and -not $_.Found } | Select-Object -ExpandProperty Id -Unique)
+    MissingForProfile = $missingForProfile
     CompatibilityWarnings = $compatibilityWarnings
     Notes = @('Read-only inventory; no software is installed, removed or switched.',
               'MSVC detection uses vswhere; a Developer PowerShell is still needed to expose cl.exe.',
